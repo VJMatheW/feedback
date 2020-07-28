@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <!-- <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script> -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <title>Feedback</title>
+        <style>
+            .submit{
+                background-color: #38b394;
+                color:#ffffff;
+            }
+            .comment{
+                font-size:13px;
+                font-family: open sans,Helvetica Neue,Helvetica,Arial,sans-serif;                
+            }            
+            .box{
+                height: 450px;
+                overflow-y: scroll;
+            }
+            .box::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+    </head>
+    <body style='background-color: #81A3D0'>
+        <div class="container mt-3">
+            <h2 class='text-center'>Feedback</h2>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card"  style='background-color: #B8DCFA;border-color: 1px solid #38b394'>
+                        <div class="card-body" style="height: 490px;">
+                            <div class="form-group">
+                                <label for="name" >Name</label>
+                                <input type="text" class="form-control input-sm" name="name" id="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="name" >Feedback</label>
+                                <textarea class="form-control" maxlength="500" rows="5" id="feedback"></textarea>
+                            </div>
+                            <div style="margin-top:30px" class="form-group">        
+                                <div class="col-sm-12 controls text-center">
+                                    <button style='width:100%' onclick="postFeedback();" class="btn btn-sm btn-success">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body" >
+                               <div class='comments box'></div>
+                            </div>
+                        </div> 
+                    </div>
+            </div>
+        </div>
+    </body> 
+
+    <script>
+        $(document).ready(function(){
+            $.ajax({
+                type:"GET",
+                url: "/feedback",
+                success: function(data){
+                    console.log(data)
+                    let comments= data.data
+
+                    comments.map(item=> {
+                        let date = new Date(item.createdAt)
+                        date = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()
+                        var tempString = '<div class="card  mb-3"><div class="card-body"><div class="row"><h5 class="pl-2">'+item.name + '</h5><p class="ml-auto"><i>'+ date + '</i></p></div><div class="pl-2 comment">' + item.feedback +'</div></div>'
+                        $('.comments').append(tempString);
+                    })
+                },
+                dataType: "json"
+            })
+        })
+
+        function postFeedback(){
+            let name = $('#name').val()
+            let feedback = $('#feedback').val()
+
+            if(!name.length > 0){
+                alert("Name should not be empty")
+                return
+            }
+
+            if(!feedback.length > 0){
+                alert("Feedback should not be empty")
+                return
+            }            
+
+            $.ajax({
+                type: "POST",
+                url: "/feedback",
+                contentType: "application/json",
+                data: JSON.stringify({name: name, feedback: feedback}),
+                success: function(data){
+                    alert("Feedback Sent !!!")
+                    location.reload()
+                },
+                dataType: "json",
+                error: function(){
+                    alert("Error Occurred !!!")
+                }
+            })
+        }
+    </script>
+</html>
